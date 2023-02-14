@@ -1,6 +1,6 @@
 ﻿<div align="center">
 
-![Socialify Banner](https://socialify.git.ci/b1acksoil/BingChat/image?font=Inter&language=1&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F9%2F9c%2FBing_Fluent_Logo.svg&name=1&owner=1&pattern=Circuit%20Board&theme=Auto)
+![Socialify Banner](https://socialify.git.ci/b1acksoil/BingChat/image?font=Inter&language=1&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F9%2F9c%2FBing_Fluent_Logo.svg&name=1&owner=1&pattern=Circuit%20Board&theme=Auto&description=1)
 
 # BingChat
 
