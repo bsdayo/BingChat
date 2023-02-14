@@ -6,9 +6,8 @@
 
 .NET API wrapper for Microsoft's new AI-powered Bing Chat.
 
-[![NuGet Version](https://img.shields.io/nuget/v/BingChat?label=Version)](https://www.nuget.org/packages/BingChat)
-[![NuGet Download Count](https://img.shields.io/nuget/dt/BingChat?label=Downloads)](https://www.nuget.org/packages/BingChat)
 ![.NET Version](https://img.shields.io/badge/.NET-6-blue)
+[![NuGet Version](https://img.shields.io/nuget/v/BingChat?label=NuGet)](https://www.nuget.org/packages/BingChat)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](./LICENSE)
 
 </div>
