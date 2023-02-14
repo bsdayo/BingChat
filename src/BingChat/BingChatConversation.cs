@@ -38,11 +38,6 @@ internal sealed class BingChatConversation : IBingChattable
             .Select(msg => msg.Text)
             .Subscribe(text =>
             {
-#if DEBUG
-                Console.WriteLine("[MESSAGE RECEIVED]");
-                Console.WriteLine(text);
-                Console.WriteLine();
-#endif
                 try
                 {
                     foreach (var part in text.Split(TerminalChar, StringSplitOptions.RemoveEmptyEntries))
