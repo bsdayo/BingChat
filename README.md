@@ -16,7 +16,7 @@
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
 
 - [Quick Start](#quick-start)
-- [Interactive Command Line Tool]()
+- [Interactive Command Line Tool](#interactive-command-line-tool)
 - [Roadmap](#roadmap)
 - [Contributors](#contributors)
 - [License](#license)
