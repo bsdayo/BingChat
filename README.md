@@ -23,7 +23,7 @@
 
 ## Quick Start
 
-> **Info**
+> **Notes**
 > You need a valid cookie from someone who has access.
 >
 > To get it, you can go to Developer Tools (F12) > Application Tab > Storage > Cookies, find the cookie named `_U`, and
