@@ -79,7 +79,13 @@ We also developed an amazing command line tool for you! See the preview below:
 
 ![CLI Preview](./assets/cli-screenshot.png)
 
-To use it, you should clone this repository, and execute the following commands:
+To use it, first set the environment variable `BING_COOKIE` to your cookie value, as talked above.
+
+> **Note**
+> We are still considering the way to handle the cookie, maybe in the future it will be stored in a config file, or provided with a command option.  
+> If you have any idea, feel free to share with us by opening an issue.
+
+Then clone this repository, and execute the following commands in the repository root:
 
 ```shell
 $ dotnet run --project src/BingChat.Cli/BingChat.Cli.csproj
