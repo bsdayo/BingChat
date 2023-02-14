@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BingChat", "src\BingChat\BingChat.csproj", "{69C76286-A82D-4AFB-B840-8B4F177A2C8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BingChat.Examples", "examples\BingChat.Examples\BingChat.Examples.csproj", "{FB8F9A10-656C-427B-9A7F-832BB83F8050}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{69C76286-A82D-4AFB-B840-8B4F177A2C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C76286-A82D-4AFB-B840-8B4F177A2C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C76286-A82D-4AFB-B840-8B4F177A2C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69C76286-A82D-4AFB-B840-8B4F177A2C8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB8F9A10-656C-427B-9A7F-832BB83F8050}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB8F9A10-656C-427B-9A7F-832BB83F8050}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB8F9A10-656C-427B-9A7F-832BB83F8050}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB8F9A10-656C-427B-9A7F-832BB83F8050}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
