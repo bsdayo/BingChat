@@ -16,6 +16,7 @@
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
 
 - [Quick Start](#quick-start)
+- [Interactive Command Line Tool]()
 - [Roadmap](#roadmap)
 - [Contributors](#contributors)
 - [License](#license)
@@ -73,9 +74,21 @@ answer = await conversation.AskAsync(secondMessage);
 Console.WriteLine($"Second answer: {answer}");
 ```
 
+## Interactive Command Line Tool
+We also developed an amazing command line tool for you! See the preview below:
+
+![CLI Preview](./assets/cli-screenshot.png)
+
+To use it, you should clone this repository, and execute the following commands:
+
+```shell
+$ dotnet run --project src/BingChat.Cli/BingChat.Cli.csproj
+```
+
 ## Roadmap
 
-- [ ] Implement a command line tool to interact with Bing Chat.
+- [x] Implement a command line tool to interact with Bing Chat.
+- [ ] Provide methods to get the full result, like adaptive cards.
 
 ## Contributors
 
