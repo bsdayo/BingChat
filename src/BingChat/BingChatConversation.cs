@@ -52,17 +52,27 @@ internal sealed class BingChatConversation : IBingChattable
                         {
                             case 1:
                                 // Update the answer
-                                answer = document.RootElement
-                                    .GetProperty("arguments")[0]
-                                    .GetProperty("messages")[0]
-                                    .GetProperty("text")
-                                    .GetString();
+                                try
+                                {
+                                    if (
+                                        document.RootElement.TryGetProperty("arguments", out var args)
+                                        && args[0].TryGetProperty("messages", out var msgs)
+                                        && msgs[0].TryGetProperty("adaptiveCards", out var cards)
+                                        && cards[0].TryGetProperty("body", out var body)
+                                        && body[0].TryGetProperty("text", out var txt))
+                                        answer = txt.GetString();
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine(e);
+                                }
+
                                 break;
 
                             case 2:
                                 // Received terminal message, cleanup
                                 Cleanup();
-                                tcs.SetResult(answer ?? string.Empty);
+                                tcs.SetResult(answer ?? "<empty answer>");
                                 return;
                         }
                     }
