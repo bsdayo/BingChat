@@ -1,6 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Title>BingChat</Title>
+        <Description>API wrapper for Microsoft's new Bing Chat.</Description>
+        <PackageVersion>0.1.0</PackageVersion>
+        <PackageProjectUrl>https://github.com/b1acksoil/BingChat</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/b1acksoil/BingChat.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>bing;chat;ai</PackageTags>
+        
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
