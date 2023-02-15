@@ -8,25 +8,26 @@
 
 ![.NET Version](https://img.shields.io/badge/.NET-6-blue)
 [![NuGet Version](https://img.shields.io/nuget/v/BingChat?label=NuGet)](https://www.nuget.org/packages/BingChat)
-[![License](https://img.shields.io/badge/license-MIT-brightgreen)](./LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-brightgreen)](./LICENSE)
 
 </div>
 
 > **Warning**
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
 
-- [Quick Start](#quick-start)
-- [Interactive Command Line Tool](#interactive-command-line-tool)
-- [Roadmap](#roadmap)
-- [Contributors](#contributors)
-- [License](#license)
+- [BingChat](#bingchat)
+  - [Quick Start](#quick-start)
+  - [Interactive Command Line Tool](#interactive-command-line-tool)
+  - [Roadmap](#roadmap)
+  - [Contributors](#contributors)
+  - [License](#license)
 
 ## Quick Start
 
 > **Note**
-> You need a valid cookie from someone who has access.
+> You need a valid cookie from someone who has access to the new Bing Chat.
 >
-> To get it, you can go to Developer Tools (F12) > Application Tab > Storage > Cookies, find the cookie named `_U`, and
+> To get it, you can go to [www.bing.com](https://www.bing.com), log in an account which has access, and then open the Developer Tools (F12) > Application Tab > Storage > Cookies, find the cookie named `_U`, and
 > copy its value.
 
 Install this package via NuGet package manager or dotnet CLI:
@@ -94,7 +95,8 @@ $ dotnet run --project src/BingChat.Cli/BingChat.Cli.csproj
 ## Roadmap
 
 - [x] Implement a command line tool to interact with Bing Chat.
-- [ ] Provide methods to get the full result, like adaptive cards.
+- [ ] Provide a way to get the full result, like adaptive cards.
+- [ ] Add ability to set timeout.
 
 ## Contributors
 
