@@ -49,8 +49,18 @@ public sealed class BingChatClient : IBingChattable
         var response = await client.GetFromJsonAsync<BingCreateConversationResponse>(
             "https://www.bing.com/turing/conversation/create");
 
+        if (response!.Result is { } errResult)
+        {
+            var message = $"{errResult.Value}: {errResult.Message}.";
+            if (errResult.Value == "UnauthorizedRequest")
+                message += " If you confirm that the correct cookie is set and you still keep seeing this, "
+                           + "maybe Bing doesn't serve your region. "
+                           + "You can use a proxy and try again.";
+            throw new BingChatException(message);
+        }
+
         return new BingChatConversation(
-            response!.ClientId, response.ConversationId, response.ConversationSignature);
+            response.ClientId, response.ConversationId, response.ConversationSignature);
     }
 
     /// <summary>
@@ -66,6 +76,14 @@ public sealed class BingChatClient : IBingChattable
 
 internal sealed class BingCreateConversationResponse
 {
+    internal class CreateConversationResult
+    {
+        public string Value { get; set; } = null!;
+        public string Message { get; set; } = null!;
+    }
+
+    public CreateConversationResult? Result { get; set; } = null;
+
     public string ConversationId { get; set; } = null!;
     public string ClientId { get; set; } = null!;
     public string ConversationSignature { get; set; } = null!;

@@ -8,7 +8,7 @@
 
 namespace BingChat;
 
-public sealed class BingChatConversationResponse
+internal sealed class BingChatConversationResponse
 {
     [JsonPropertyName("type")]
     public int Type { get; set; }
@@ -17,13 +17,13 @@ public sealed class BingChatConversationResponse
     public Item Item { get; set; }
 }
 
-public sealed class Item
+internal sealed class Item
 {
     [JsonPropertyName("messages")]
     public Message[] Messages { get; set; }
 }
 
-public sealed class Message
+internal sealed class Message
 {
     [JsonPropertyName("text")]
     public string Text { get; set; }
@@ -38,13 +38,13 @@ public sealed class Message
     public AdaptiveCard[] AdaptiveCards { get; set; }
 }
 
-public sealed class AdaptiveCard
+internal sealed class AdaptiveCard
 {
     [JsonPropertyName("body")]
     public Body[] Body { get; set; }
 }
 
-public sealed class Body
+internal sealed class Body
 {
     [JsonPropertyName("type")]
     public string Type { get; set; }
