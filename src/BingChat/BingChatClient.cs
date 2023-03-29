@@ -49,7 +49,8 @@ public sealed class BingChatClient : IBingChattable
         var response = await client.GetFromJsonAsync<BingCreateConversationResponse>(
             "https://www.bing.com/turing/conversation/create");
 
-        if (response!.Result is { } errResult)
+        if (response!.Result is { } errResult &&
+            !errResult.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
         {
             var message = $"{errResult.Value}: {errResult.Message}.";
             if (errResult.Value == "UnauthorizedRequest")

@@ -3,7 +3,7 @@
     <PropertyGroup>
         <Title>BingChat</Title>
         <Description>API wrapper for Microsoft's new Bing Chat.</Description>
-        <PackageVersion>0.4.0</PackageVersion>
+        <PackageVersion>0.4.1</PackageVersion>
         <PackageProjectUrl>https://github.com/b1acksoil/BingChat</PackageProjectUrl>
         <RepositoryUrl>https://github.com/b1acksoil/BingChat.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
