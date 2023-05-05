@@ -2,6 +2,10 @@
 
 public sealed class BingChatClientOptions
 {
+    /// <inheritdoc cref="CookieU"/>
+    [Obsolete("Use CookieU property instead.")]
+    public string? Cookie { get; set; }
+
     /// <summary>
     /// The _U cookie value
     /// </summary>
