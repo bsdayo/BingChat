@@ -10,7 +10,7 @@ public static partial class Examples
         // Construct the chat client
         var client = new BingChatClient(new BingChatClientOptions
         {
-            Cookie = cookie
+            CookieU = cookie
         });
 
         Console.WriteLine("Please wait...");

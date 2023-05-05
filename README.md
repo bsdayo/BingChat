@@ -45,7 +45,7 @@ using BingChat;
 var client = new BingChatClient(new BingChatClientOptions
 {
     // The "_U" cookie's value
-    Cookie = cookie
+    CookieU = strU,
 });
 
 var message = "Do you like cats?";
@@ -97,6 +97,46 @@ $ dotnet run --project src/BingChat.Cli/BingChat.Cli.csproj
 - [x] Implement a command line tool to interact with Bing Chat.
 - [ ] Provide a way to get the full result, like adaptive cards.
 - [ ] Add ability to set timeout.
+
+## Q&A
+
+UnauthorizedRequest Exception
+
+<details>
+    <summary>Solution</summary>
+    <p>There are multiple reasons. You may follow these steps to handle the problem.</p>
+    <p>1. Refresh the webpage, confirm that the '_U' value is up to date and copied correctly, and retry.</p>
+    <p>2. If you are using a proxy (VPN), try setting the global proxy, and retry. The code is as follows:</p>
+    <blockquote>
+    HttpClient.DefaultProxy = new WebProxy("127.0.0.1:8807"); //Your proxy address and port
+    </blockquote>
+    <p>3. Find another cookie named 'KievRPSSecAuth', set its value, and retry. The code is as follows:</p>
+    <blockquote>
+    var client = new BingChatClient(new BingChatClientOptions {
+    <br>
+    // The "_U" cookie's value
+    <br>
+    CookieU = strU,
+    <br>
+    // The "KievRPSSecAuth" cookie's value
+    <br>
+    CookieKievRPSSecAuth = strKievRPSSecAuth,
+    <br>
+    });
+    </blockquote>
+    <p>4. Open the browser menu > Extensions. Search for 'Cookie Editor' and install it.</p>
+    <p>Go to Bing Chat webpage and export all cookies to to a local file in JSON format.</p>
+    <p>Set file path value as follows (The "_U" and "KievRPSSecAuth" value are not needed at this time):</p>
+    <blockquote>
+    var client = new BingChatClient(new BingChatClientOptions {
+    <br>
+    // The exported cookie file path
+    <br>
+    CookieFilePath = strFilePath,
+    <br>
+    });
+    </blockquote>
+</details>
 
 ## Contributors
 
