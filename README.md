@@ -16,18 +16,19 @@
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
 
 - [BingChat](#bingchat)
-  - [Quick Start](#quick-start)
-  - [Interactive Command Line Tool](#interactive-command-line-tool)
-  - [Roadmap](#roadmap)
-  - [Contributors](#contributors)
-  - [License](#license)
+    - [Quick Start](#quick-start)
+    - [Interactive Command Line Tool](#interactive-command-line-tool)
+    - [Roadmap](#roadmap)
+    - [Contributors](#contributors)
+    - [License](#license)
 
 ## Quick Start
 
 > **Note**
 > You need a valid cookie from someone who has access to the new Bing Chat.
 >
-> To get it, you can go to [www.bing.com](https://www.bing.com), log in an account which has access, and then open the Developer Tools (F12) > Application Tab > Storage > Cookies, find the cookie named `_U`, and
+> To get it, you can go to [www.bing.com](https://www.bing.com), log in an account which has access, and then open the
+> Developer Tools (F12) > Application Tab > Storage > Cookies, find the cookie named `_U`, and
 > copy its value.
 
 Install this package via NuGet package manager or dotnet CLI:
@@ -76,6 +77,7 @@ Console.WriteLine($"Second answer: {answer}");
 ```
 
 ## Interactive Command Line Tool
+
 We also developed an amazing command line tool for you! See the preview below:
 
 ![CLI Preview](./assets/cli-screenshot.png)
@@ -83,7 +85,8 @@ We also developed an amazing command line tool for you! See the preview below:
 To use it, first set the environment variable `BING_COOKIE` to your cookie value, as talked above.
 
 > **Note**
-> We are still considering the way to handle the cookie, maybe in the future it will be stored in a config file, or provided with a command option.  
+> We are still considering the way to handle the cookie, maybe in the future it will be stored in a config file, or
+> provided with a command option.  
 > If you have any idea, feel free to share with us by opening an issue.
 
 Then clone this repository, and execute the following commands in the repository root:
@@ -103,39 +106,39 @@ $ dotnet run --project src/BingChat.Cli/BingChat.Cli.csproj
 UnauthorizedRequest Exception
 
 <details>
-    <summary>Solution</summary>
-    <p>There are multiple reasons. You may follow these steps to handle the problem.</p>
-    <p>1. Refresh the webpage, confirm that the '_U' value is up to date and copied correctly, and retry.</p>
-    <p>2. If you are using a proxy (VPN), try setting the global proxy, and retry. The code is as follows:</p>
-    <blockquote>
+<summary>Solution</summary>
+
+There are multiple reasons. You may follow these steps to handle the problem.
+
+1. Refresh the webpage, confirm that the '_U' value is up to date and copied correctly, and retry.
+2. If you are using a proxy (VPN), try setting the global proxy, and retry. The code is as follows:
+
+    ```csharp
     HttpClient.DefaultProxy = new WebProxy("127.0.0.1:8807"); //Your proxy address and port
-    </blockquote>
-    <p>3. Find another cookie named 'KievRPSSecAuth', set its value, and retry. The code is as follows:</p>
-    <blockquote>
+    ```
+
+3. Find another cookie named 'KievRPSSecAuth', set its value, and retry. The code is as follows:
+
+    ```csharp
     var client = new BingChatClient(new BingChatClientOptions {
-    <br>
-    // The "_U" cookie's value
-    <br>
-    CookieU = strU,
-    <br>
-    // The "KievRPSSecAuth" cookie's value
-    <br>
-    CookieKievRPSSecAuth = strKievRPSSecAuth,
-    <br>
+        // The "_U" cookie's value
+        CookieU = strU,
+        // The "KievRPSSecAuth" cookie's value
+        CookieKievRPSSecAuth = strKievRPSSecAuth,
     });
-    </blockquote>
-    <p>4. Open the browser menu > Extensions. Search for 'Cookie Editor' and install it.</p>
-    <p>Go to Bing Chat webpage and export all cookies to to a local file in JSON format.</p>
-    <p>Set file path value as follows (The "_U" and "KievRPSSecAuth" value are not needed at this time):</p>
-    <blockquote>
+    ```
+
+4. Open the browser menu > Extensions. Search for 'Cookie Editor' and install it.
+   Go to Bing Chat webpage and export all cookies to to a local file in JSON format.
+   Set file path value as follows (The "_U" and "KievRPSSecAuth" value are not needed at this time):
+
+    ```csharp
     var client = new BingChatClient(new BingChatClientOptions {
-    <br>
-    // The exported cookie file path
-    <br>
-    CookieFilePath = strFilePath,
-    <br>
+        // The exported cookie file path
+        CookieFilePath = strFilePath,
     });
-    </blockquote>
+    ```
+
 </details>
 
 ## Contributors
