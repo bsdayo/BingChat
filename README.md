@@ -15,12 +15,12 @@
 > **Warning**
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
 
-- [BingChat](#bingchat)
-    - [Quick Start](#quick-start)
-    - [Interactive Command Line Tool](#interactive-command-line-tool)
-    - [Roadmap](#roadmap)
-    - [Contributors](#contributors)
-    - [License](#license)
+- [Quick Start](#quick-start)
+- [Interactive Command Line Tool](#interactive-command-line-tool)
+- [Roadmap](#roadmap)
+- [Q&A](#qa)
+- [Contributors](#contributors)
+- [License](#license)
 
 ## Quick Start
 
