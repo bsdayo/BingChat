@@ -9,7 +9,7 @@ internal static class Utils
         var cookie = Environment.GetEnvironmentVariable("BING_COOKIE");
         return new BingChatClient(new BingChatClientOptions
         {
-            Cookie = cookie
+            CookieU = cookie
         });
     }
 
