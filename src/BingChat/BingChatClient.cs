@@ -107,7 +107,7 @@ public sealed class BingChatClient : IBingChattable
         }
 
         return new BingChatConversation(
-            response.ClientId, response.ConversationId, response.ConversationSignature);
+            response.ClientId, response.ConversationId, response.ConversationSignature, _options.Tone);
     }
 
     /// <summary>
