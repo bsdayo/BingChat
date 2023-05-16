@@ -37,6 +37,11 @@ internal sealed class BingChatConversation : IBingChattable
 
         string? GetAnswer(BingChatConversationResponse response)
         {
+            if (!response.Item.Result.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new BingChatException($"{response.Item.Result.Value}: {response.Item.Result.Message}");
+            }
+
             for (var index = response.Item.Messages.Length - 1; index >= 0; index--)
             {
                 var itemMessage = response.Item.Messages[index];
