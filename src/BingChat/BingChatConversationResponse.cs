@@ -21,6 +21,9 @@ internal sealed class Item
 {
     [JsonPropertyName("messages")]
     public Message[] Messages { get; set; }
+
+    [JsonPropertyName("result")]
+    public Result Result { get; set; }
 }
 
 internal sealed class Message
@@ -54,4 +57,13 @@ internal sealed class Body
 
     [JsonPropertyName("wrap")]
     public bool Wrap { get; set; }
+}
+
+internal sealed class Result
+{
+    [JsonPropertyName("value")]
+    public string Value { get; set; }
+
+    [JsonPropertyName("message")]
+    public string Message { get; set; }
 }
