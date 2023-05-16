@@ -47,6 +47,8 @@ var client = new BingChatClient(new BingChatClientOptions
 {
     // The "_U" cookie's value
     CookieU = strU,
+    // Tone used for conversation
+    Tone = BingChatTone.Balanced,
 });
 
 var message = "Do you like cats?";

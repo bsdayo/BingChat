@@ -14,9 +14,9 @@ internal sealed class BingChatConversation : IBingChattable
     private readonly BingChatRequest _request;
 
     internal BingChatConversation(
-        string clientId, string conversationId, string conversationSignature)
+        string clientId, string conversationId, string conversationSignature, BingChatTone tone)
     {
-        _request = new BingChatRequest(clientId, conversationId, conversationSignature);
+        _request = new BingChatRequest(clientId, conversationId, conversationSignature, tone);
     }
 
 
