@@ -100,7 +100,7 @@ $ dotnet run --project src/BingChat.Cli/BingChat.Cli.csproj
 ## Roadmap
 
 - [x] Implement a command line tool to interact with Bing Chat.
-- [ ] Provide a way to get the full result, like adaptive cards.
+- [x] Provide a way to get the full result, like adaptive cards.
 - [ ] Add ability to set timeout.
 
 ## Q&A

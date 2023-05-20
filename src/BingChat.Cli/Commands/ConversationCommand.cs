@@ -81,6 +81,12 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                     .Spinner(Spinner.Known.BouncingBar)
                     .StartAsync("Bing is thinking...", async _ => { answer = await conversation.AskAsync(text); });
 
+                if (answer.EndsWith("\n<Disengaged>"))
+                {
+                    conversation = null;
+                    answer = answer.Replace("\n<Disengaged>", "\nIt might be time to move onto a new topic. Let's start over.");
+                }
+
                 Utils.WriteAnswer(answer, settings);
             }
         }
