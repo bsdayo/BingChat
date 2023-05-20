@@ -44,7 +44,7 @@ public sealed class BingChatClient : IBingChattable
             {
                 JsonNode? cookieJson = JsonNode.Parse(File.ReadAllText(_options.CookieFilePath));
                 cookies = new CookieContainer();
-                foreach (var cookieItemJson in (JsonArray)cookieJson)
+                foreach (var cookieItemJson in (JsonArray)cookieJson!)
                 {
                     if (cookieItemJson is null)
                         continue;
@@ -92,8 +92,9 @@ public sealed class BingChatClient : IBingChattable
         headers.Add("referer", "https://www.bing.com/search");
         headers.Add("referer-policy", "origin-when-cross-origin");
 
-        var response = await client.GetFromJsonAsync<BingCreateConversationResponse>(
-            "https://www.bing.com/turing/conversation/create");
+        var response = await client.GetFromJsonAsync(
+            "https://www.bing.com/turing/conversation/create",
+            SerializerContext.Default.BingCreateConversationResponse);
 
         if (response!.Result is { } errResult &&
             !errResult.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
@@ -129,7 +130,7 @@ internal sealed class BingCreateConversationResponse
         public string Message { get; set; } = null!;
     }
 
-    public CreateConversationResult? Result { get; set; } = null;
+    public CreateConversationResult? Result { get; set; }
 
     public string ConversationId { get; set; } = null!;
     public string ClientId { get; set; } = null!;

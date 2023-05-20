@@ -14,19 +14,19 @@ internal sealed class BingChatConversationResponse
     public int Type { get; set; }
 
     [JsonPropertyName("item")]
-    public Item Item { get; set; }
+    public ResponseItem Item { get; set; }
 }
 
-internal sealed class Item
+internal sealed class ResponseItem
 {
     [JsonPropertyName("messages")]
-    public Message[] Messages { get; set; }
+    public ResponseMessage[] Messages { get; set; }
 
     [JsonPropertyName("result")]
-    public Result Result { get; set; }
+    public ResponseResult Result { get; set; }
 }
 
-internal sealed class Message
+internal sealed class ResponseMessage
 {
     [JsonPropertyName("text")]
     public string Text { get; set; }
@@ -44,10 +44,10 @@ internal sealed class Message
 internal sealed class AdaptiveCard
 {
     [JsonPropertyName("body")]
-    public Body[] Body { get; set; }
+    public ResponseBody[] Body { get; set; }
 }
 
-internal sealed class Body
+internal sealed class ResponseBody
 {
     [JsonPropertyName("type")]
     public string Type { get; set; }
@@ -59,7 +59,7 @@ internal sealed class Body
     public bool Wrap { get; set; }
 }
 
-internal sealed class Result
+internal sealed class ResponseResult
 {
     [JsonPropertyName("value")]
     public string Value { get; set; }

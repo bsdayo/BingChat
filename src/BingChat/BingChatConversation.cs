@@ -19,7 +19,6 @@ internal sealed class BingChatConversation : IBingChattable
         _request = new BingChatRequest(clientId, conversationId, conversationSignature, tone);
     }
 
-
     /// <inheritdoc/>
     public Task<string> AskAsync(string message)
     {
@@ -61,7 +60,7 @@ internal sealed class BingChatConversation : IBingChattable
             {
                 foreach (var part in text.Split(TerminalChar, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    var json = JsonSerializer.Deserialize<BingChatConversationResponse>(part);
+                    var json = JsonSerializer.Deserialize(part, SerializerContext.Default.BingChatConversationResponse);
 
                     if (json is not { Type: 2 }) continue;
 
