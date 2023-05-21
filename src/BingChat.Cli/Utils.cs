@@ -41,7 +41,7 @@ internal static class Utils
 
     public static void WriteAnswer(string answer, ChatCommandSettings settings)
     {
-        var text = Markup.Escape(answer.Trim().ReorderFootnotes());
+        var text = Markup.Escape(answer.Trim());
         switch (settings.Theme)
         {
             case ChatTheme.Bubble:

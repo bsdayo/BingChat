@@ -29,7 +29,7 @@ internal sealed class ResponseItem
 internal sealed class ResponseMessage
 {
     [JsonPropertyName("text")]
-    public string Text { get; set; }
+    public string? Text { get; set; }
 
     [JsonPropertyName("author")]
     public string Author { get; set; }
@@ -38,7 +38,10 @@ internal sealed class ResponseMessage
     public string? MessageType { get; set; }
 
     [JsonPropertyName("adaptiveCards")]
-    public AdaptiveCard[] AdaptiveCards { get; set; }
+    public AdaptiveCard[]? AdaptiveCards { get; set; }
+
+    [JsonPropertyName("sourceAttributions")]
+    public SourceAttribution[]? SourceAttributions { get; set; }
 }
 
 internal sealed class AdaptiveCard
@@ -53,10 +56,16 @@ internal sealed class ResponseBody
     public string Type { get; set; }
 
     [JsonPropertyName("text")]
-    public string Text { get; set; }
+    public string? Text { get; set; }
+}
 
-    [JsonPropertyName("wrap")]
-    public bool Wrap { get; set; }
+internal sealed class SourceAttribution
+{
+    [JsonPropertyName("providerDisplayName")]
+    public string ProviderDisplayName { get; set; }
+
+    [JsonPropertyName("seeMoreUrl")]
+    public string SeeMoreUrl { get; set; }
 }
 
 internal sealed class ResponseResult
@@ -65,5 +74,5 @@ internal sealed class ResponseResult
     public string Value { get; set; }
 
     [JsonPropertyName("message")]
-    public string Message { get; set; }
+    public string? Message { get; set; }
 }

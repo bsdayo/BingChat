@@ -41,8 +41,14 @@ internal static class BingChatConstants
         "InternalSearchQuery",
         "InternalSearchResult",
         "InternalLoaderMessage",
+        "Disengaged",
+        "ActionRequest",
+        "Context",
+        "Progress",
         "RenderCardRequest",
         "AdsQuery",
-        "SemanticSerp"
+        "SemanticSerp",
+        "GenerateContentQuery",
+        "SearchQuery",
     };
 }

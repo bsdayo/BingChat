@@ -36,22 +36,61 @@ internal sealed class BingChatConversation : IBingChattable
 
         string? GetAnswer(BingChatConversationResponse response)
         {
+            //Check status
             if (!response.Item.Result.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
             {
                 throw new BingChatException($"{response.Item.Result.Value}: {response.Item.Result.Message}");
             }
 
-            for (var index = response.Item.Messages.Length - 1; index >= 0; index--)
+            //Collect messages, including of types: Chat, SearchQuery, LoaderMessage, Disengaged
+            var messages = new List<string>();
+            foreach (var itemMessage in response.Item.Messages)
             {
-                var itemMessage = response.Item.Messages[index];
-                if (itemMessage.MessageType != null) continue;
+                //Not needed
                 if (itemMessage.Author != "bot") continue;
+                if (itemMessage.MessageType == "InternalSearchResult" ||
+                    itemMessage.MessageType == "RenderCardRequest")
+                    continue;
 
-                // maybe is possible to use itemMessage.Text directly, but some extra information will be lost
-                return itemMessage.AdaptiveCards[0].Body[0].Text;
+                //Not supported
+                if (itemMessage.MessageType == "GenerateContentQuery")
+                    continue;
+
+                //From Text
+                var text = itemMessage.Text;
+
+                //From AdaptiveCards
+                var adaptiveCards = itemMessage.AdaptiveCards;
+                if (text is null && adaptiveCards is not null && adaptiveCards.Length > 0)
+                {
+                    var bodies = new List<string>();
+                    foreach (var body in adaptiveCards[0].Body)
+                    {
+                        if (body.Type != "TextBlock" || body.Text is null) continue;
+                        bodies.Add(body.Text);
+                    }
+                    text = bodies.Count > 0 ? string.Join("\n", bodies) : null;
+                }
+
+                //From MessageType
+                text ??= $"<{itemMessage.MessageType}>";
+
+                //From SourceAttributions
+                var sourceAttributions = itemMessage.SourceAttributions;
+                if (sourceAttributions is not null && sourceAttributions.Length > 0)
+                {
+                    text += "\n";
+                    for (var nIndex = 0; nIndex < sourceAttributions.Length; nIndex++)
+                    {
+                        var sourceAttribution = sourceAttributions[nIndex];
+                        text += $"\n[{nIndex + 1}]: {sourceAttribution.SeeMoreUrl} \"{sourceAttribution.ProviderDisplayName}\"";
+                    }
+                }
+
+                messages.Add(text);
             }
 
-            return null;
+            return messages.Count > 0 ? string.Join("\n\n", messages) : null;
         }
 
         void OnMessageReceived(string text)
