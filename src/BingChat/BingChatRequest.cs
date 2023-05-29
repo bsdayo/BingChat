@@ -32,38 +32,29 @@ internal sealed class BingChatRequest
 
         var payload = new BingChatConversationRequest
         {
-            Type = 4,
-            InvocationId = _invocationId.ToString(CultureInfo.InvariantCulture),
-            Target = "chat",
-            Arguments = new[]
+            Source = "cib",
+            OptionsSets = _tone switch
             {
-                new RequestArgument
-                {
-                    Source = "cib",
-                    OptionsSets = _tone switch
-                    {
-                        BingChatTone.Creative => BingChatConstants.CreativeOptionSets,
-                        BingChatTone.Precise => BingChatConstants.PreciseOptionSets,
-                        BingChatTone.Balanced or _ => BingChatConstants.BalancedOptionSets
-                    },
-                    AllowedMessageTypes = BingChatConstants.AllowedMessageTypes,
-                    SliceIds = Array.Empty<string>(),
-                    TraceId = traceId,
-                    IsStartOfSession = _invocationId == 0,
-                    Message = new RequestMessage
-                    {
-                        Timestamp = DateTime.Now,
-                        Author = "user",
-                        InputMethod = "Keyboard",
-                        MessageType = "Chat",
-                        Text = message
-                    },
-                    Tone = _tone.ToString(),
-                    ConversationSignature = _conversationSignature,
-                    Participant = new() { Id = _clientId },
-                    ConversationId = _conversationId
-                }
-            }
+                BingChatTone.Creative => BingChatConstants.CreativeOptionSets,
+                BingChatTone.Precise => BingChatConstants.PreciseOptionSets,
+                BingChatTone.Balanced or _ => BingChatConstants.BalancedOptionSets
+            },
+            AllowedMessageTypes = BingChatConstants.AllowedMessageTypes,
+            SliceIds = Array.Empty<string>(),
+            TraceId = traceId,
+            IsStartOfSession = _invocationId == 0,
+            Message = new RequestMessage
+            {
+                Timestamp = DateTime.Now,
+                Author = "user",
+                InputMethod = "Keyboard",
+                MessageType = "Chat",
+                Text = message
+            },
+            Tone = _tone.ToString(),
+            ConversationSignature = _conversationSignature,
+            Participant = new() { Id = _clientId },
+            ConversationId = _conversationId
         };
 
         _invocationId++;

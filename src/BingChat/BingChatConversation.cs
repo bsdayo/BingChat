@@ -1,5 +1,4 @@
-﻿using System.Reactive.Linq;
-using Microsoft.AspNetCore.Connections;
+﻿using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.SignalR;
