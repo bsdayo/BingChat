@@ -24,7 +24,7 @@ internal sealed class BingChatRequest
     /// Construct the initial payload for each message
     /// </summary>
     /// <param name="message">User message to Bing Chat</param>
-    internal string ConstructInitialPayload(string message)
+    internal BingChatConversationRequest ConstructInitialPayload(string message)
     {
         var bytes = (stackalloc byte[16]);
         Random.Shared.NextBytes(bytes);
@@ -67,6 +67,6 @@ internal sealed class BingChatRequest
         };
 
         _invocationId++;
-        return JsonSerializer.Serialize(payload, SerializerContext.Default.BingChatConversationRequest);
+        return payload;
     }
 }

@@ -1,7 +1,13 @@
-﻿using System.Net.WebSockets;
-using System.Reactive.Linq;
-using System.Text.Json;
-using Websocket.Client;
+﻿using System.Reactive.Linq;
+using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Http.Connections.Client;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.AspNetCore.SignalR.Protocol;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace BingChat;
 
@@ -10,7 +16,29 @@ namespace BingChat;
 /// </summary>
 internal sealed class BingChatConversation : IBingChattable
 {
-    private const char TerminalChar = '\u001e';
+    private static readonly HttpConnectionFactory ConnectionFactory = new(Options.Create(
+        new HttpConnectionOptions
+        {
+            DefaultTransferFormat = TransferFormat.Text,
+            SkipNegotiation = true,
+            Transports = HttpTransportType.WebSockets,
+            Headers =
+            {
+                ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                                "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                                "Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57"
+            }
+        }),
+        NullLoggerFactory.Instance);
+
+    private static readonly JsonHubProtocol HubProtocol = new(
+        Options.Create(new JsonHubProtocolOptions()
+        {
+            PayloadSerializerOptions = SerializerContext.Default.Options
+        }));
+
+    private static readonly UriEndPoint HubEndpoint = new(new Uri("wss://sydney.bing.com/sydney/ChatHub"));
+
     private readonly BingChatRequest _request;
 
     internal BingChatConversation(
@@ -20,122 +48,81 @@ internal sealed class BingChatConversation : IBingChattable
     }
 
     /// <inheritdoc/>
-    public Task<string> AskAsync(string message)
+    public async Task<string> AskAsync(string message)
     {
-        var wsClient = new WebsocketClient(new Uri("wss://sydney.bing.com/sydney/ChatHub"));
-        var tcs = new TaskCompletionSource<string>();
+        var request = _request.ConstructInitialPayload(message);
 
-        void Cleanup()
+        await using var conn = new HubConnection(
+            ConnectionFactory,
+            HubProtocol,
+            HubEndpoint,
+            new ServiceCollection().BuildServiceProvider(),
+            NullLoggerFactory.Instance);
+
+        await conn.StartAsync();
+
+        var response = await conn
+            .StreamAsync<BingChatConversationResponse>("chat", request)
+            .FirstAsync();
+
+        return BuildAnswer(response) ?? "<empty answer>";
+    }
+
+    private static string? BuildAnswer(BingChatConversationResponse response)
+    {
+        //Check status
+        if (!response.Result.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
         {
-            wsClient.Stop(WebSocketCloseStatus.Empty, string.Empty).ContinueWith(t =>
-            {
-                if (t.IsFaulted) tcs.SetException(t.Exception!);
-                wsClient.Dispose();
-            });
+            throw new BingChatException($"{response.Result.Value}: {response.Result.Message}");
         }
 
-        string? GetAnswer(BingChatConversationResponse response)
+        //Collect messages, including of types: Chat, SearchQuery, LoaderMessage, Disengaged
+        var messages = new List<string>();
+        foreach (var itemMessage in response.Messages)
         {
-            //Check status
-            if (!response.Item.Result.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
+            //Not needed
+            if (itemMessage.Author != "bot") continue;
+            if (itemMessage.MessageType is "InternalSearchResult" or "RenderCardRequest")
+                continue;
+
+            //Not supported
+            if (itemMessage.MessageType is "GenerateContentQuery")
+                continue;
+
+            //From Text
+            var text = itemMessage.Text;
+
+            //From AdaptiveCards
+            var adaptiveCards = itemMessage.AdaptiveCards;
+            if (text is null && adaptiveCards?.Length > 0)
             {
-                throw new BingChatException($"{response.Item.Result.Value}: {response.Item.Result.Message}");
+                var bodies = new List<string>();
+                foreach (var body in adaptiveCards[0].Body)
+                {
+                    if (body.Type != "TextBlock" || body.Text is null) continue;
+                    bodies.Add(body.Text);
+                }
+                text = bodies.Count > 0 ? string.Join("\n", bodies) : null;
             }
 
-            //Collect messages, including of types: Chat, SearchQuery, LoaderMessage, Disengaged
-            var messages = new List<string>();
-            foreach (var itemMessage in response.Item.Messages)
+            //From MessageType
+            text ??= $"<{itemMessage.MessageType}>";
+
+            //From SourceAttributions
+            var sourceAttributions = itemMessage.SourceAttributions;
+            if (sourceAttributions?.Length > 0)
             {
-                //Not needed
-                if (itemMessage.Author != "bot") continue;
-                if (itemMessage.MessageType == "InternalSearchResult" ||
-                    itemMessage.MessageType == "RenderCardRequest")
-                    continue;
-
-                //Not supported
-                if (itemMessage.MessageType == "GenerateContentQuery")
-                    continue;
-
-                //From Text
-                var text = itemMessage.Text;
-
-                //From AdaptiveCards
-                var adaptiveCards = itemMessage.AdaptiveCards;
-                if (text is null && adaptiveCards is not null && adaptiveCards.Length > 0)
+                text += "\n";
+                for (var nIndex = 0; nIndex < sourceAttributions.Length; nIndex++)
                 {
-                    var bodies = new List<string>();
-                    foreach (var body in adaptiveCards[0].Body)
-                    {
-                        if (body.Type != "TextBlock" || body.Text is null) continue;
-                        bodies.Add(body.Text);
-                    }
-                    text = bodies.Count > 0 ? string.Join("\n", bodies) : null;
+                    var sourceAttribution = sourceAttributions[nIndex];
+                    text += $"\n[{nIndex + 1}]: {sourceAttribution.SeeMoreUrl} \"{sourceAttribution.ProviderDisplayName}\"";
                 }
-
-                //From MessageType
-                text ??= $"<{itemMessage.MessageType}>";
-
-                //From SourceAttributions
-                var sourceAttributions = itemMessage.SourceAttributions;
-                if (sourceAttributions is not null && sourceAttributions.Length > 0)
-                {
-                    text += "\n";
-                    for (var nIndex = 0; nIndex < sourceAttributions.Length; nIndex++)
-                    {
-                        var sourceAttribution = sourceAttributions[nIndex];
-                        text += $"\n[{nIndex + 1}]: {sourceAttribution.SeeMoreUrl} \"{sourceAttribution.ProviderDisplayName}\"";
-                    }
-                }
-
-                messages.Add(text);
             }
 
-            return messages.Count > 0 ? string.Join("\n\n", messages) : null;
+            messages.Add(text);
         }
 
-        void OnMessageReceived(string text)
-        {
-            try
-            {
-                foreach (var part in text.Split(TerminalChar, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    var json = JsonSerializer.Deserialize(part, SerializerContext.Default.BingChatConversationResponse);
-
-                    if (json is not { Type: 2 }) continue;
-
-                    Cleanup();
-
-                    tcs.SetResult(GetAnswer(json) ?? "<empty answer>");
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                Cleanup();
-                tcs.SetException(e);
-            }
-        }
-
-        wsClient.MessageReceived
-                .Where(msg => msg.MessageType == WebSocketMessageType.Text)
-                .Select(msg => msg.Text)
-                .Subscribe(OnMessageReceived);
-
-        // Start the WebSocket client
-        wsClient.Start().ContinueWith(t =>
-        {
-            if (t.IsFaulted)
-            {
-                Cleanup();
-                tcs.SetException(t.Exception!);
-                return;
-            }
-
-            // Send initial messages
-            wsClient.Send("{\"protocol\":\"json\",\"version\":1}" + TerminalChar);
-            wsClient.Send(_request.ConstructInitialPayload(message) + TerminalChar);
-        });
-
-        return tcs.Task;
+        return messages.Count > 0 ? string.Join("\n\n", messages) : null;
     }
 }
