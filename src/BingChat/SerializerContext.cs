@@ -1,10 +1,11 @@
 using System.Text.Json.Serialization;
+using BingChat.Model;
 
 namespace BingChat;
 
 [JsonSerializable(typeof(BingCreateConversationResponse))]
-[JsonSerializable(typeof(BingChatConversationRequest))]
-[JsonSerializable(typeof(BingChatConversationResponse))]
+[JsonSerializable(typeof(ChatRequest))]
+[JsonSerializable(typeof(ChatResponse))]
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]

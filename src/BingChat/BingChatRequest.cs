@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using BingChat.Model;
 
 namespace BingChat;
 
@@ -24,13 +23,13 @@ internal sealed class BingChatRequest
     /// Construct the initial payload for each message
     /// </summary>
     /// <param name="message">User message to Bing Chat</param>
-    internal BingChatConversationRequest ConstructInitialPayload(string message)
+    internal ChatRequest ConstructInitialPayload(string message)
     {
         var bytes = (stackalloc byte[16]);
         Random.Shared.NextBytes(bytes);
         var traceId = Convert.ToHexString(bytes).ToLowerInvariant();
 
-        var payload = new BingChatConversationRequest
+        var payload = new ChatRequest
         {
             Source = "cib",
             OptionsSets = _tone switch

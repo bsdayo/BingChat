@@ -4,9 +4,9 @@
 
 #pragma warning disable CS8618
 
-namespace BingChat;
+namespace BingChat.Model;
 
-internal sealed class BingChatConversationRequest
+internal sealed class ChatRequest
 {
     public string Source { get; set; }
     public string[] OptionsSets { get; set; }
