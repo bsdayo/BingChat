@@ -15,12 +15,13 @@
 > **Warning**
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
 
-- [Quick Start](#quick-start)
-- [Interactive Command Line Tool](#interactive-command-line-tool)
-- [Roadmap](#roadmap)
-- [Q&A](#qa)
-- [Contributors](#contributors)
-- [License](#license)
+- [BingChat](#bingchat)
+  - [Quick Start](#quick-start)
+  - [Interactive Command Line Tool](#interactive-command-line-tool)
+  - [Roadmap](#roadmap)
+  - [Q\&A](#qa)
+  - [Contributors](#contributors)
+  - [License](#license)
 
 ## Quick Start
 
@@ -100,8 +101,11 @@ $ dotnet run --project src/BingChat.Cli/BingChat.Cli.csproj
 ## Roadmap
 
 - [x] Implement a command line tool to interact with Bing Chat.
-- [x] Provide a way to get the full result, like adaptive cards.
-- [ ] Add ability to set timeout.
+- [x] Provide a way to get the full result, like adaptive cards
+- [x] Add ability to set timeout
+- [ ] Validate that connectivity issues are gone after switching to SignalR
+- [ ] Research OptionSet specifics, analyze whether switching to `harmonyv3` enables the older model which has better performance
+- [ ] Expose rich response object via `.SendAsync(..)` to allow detailed access and control over the conversation state
 
 ## Q&A
 
