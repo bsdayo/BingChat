@@ -11,12 +11,12 @@ public static partial class Examples
         var client = new BingChatClient(new BingChatClientOptions
         {
             CookieU = cookie,
-            Tone = BingChatTone.Balanced,
+            Tone = BingChatTone.Creative,
         });
 
         Console.WriteLine("Please wait...\n");
 
-        var message = "List the most important quotes from today's news.";
+        var message = "Write an example creepypasta about BingChat.";
         var responseStream = client.StreamAsync(message);
 
         await foreach (var word in responseStream)
