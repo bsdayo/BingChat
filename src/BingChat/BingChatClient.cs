@@ -23,21 +23,17 @@ public sealed class BingChatClient : IBingChattable
         var requestId = Guid.NewGuid();
 
         var cookies = new CookieContainer();
-        if (string.IsNullOrEmpty(_options.CookieFilePath) &&
-            string.IsNullOrEmpty(_options.CookieU) &&
-            string.IsNullOrEmpty(_options.CookieKievRPSSecAuth))
-        {
-            throw new BingChatException("At least one of 'CookieU', 'CookieKievRPSSecAuth' and 'CookieFilePath' is needed.");
-        }
         if (!string.IsNullOrEmpty(_options.CookieU))
         {
             cookies.Add(new Uri("https://www.bing.com"), new Cookie("_U", _options.CookieU));
         }
+
         if (!string.IsNullOrEmpty(_options.CookieKievRPSSecAuth))
         {
             cookies.Add(new Uri("https://www.bing.com"),
                 new Cookie("KievRPSSecAuth", HttpUtility.UrlEncode(_options.CookieKievRPSSecAuth)));
         }
+
         if (!string.IsNullOrEmpty(_options.CookieFilePath))
         {
             //Read cookie file
@@ -65,9 +61,12 @@ public sealed class BingChatClient : IBingChattable
             catch
             {
                 throw new BingChatException("The format of the cookie file is not supported. " +
-                    "PLease install \"Cookie Editor\" and export cookies in JSON format.");
+                                            "PLease install \"Cookie Editor\" and export cookies in JSON format.");
             }
         }
+
+        if (cookies.Count == 0)
+            cookies.Add(new Uri("https://www.bing.com"), new Cookie("_U", Utils.GenerateRandomHexString()));
 
         using var handler = new HttpClientHandler { CookieContainer = cookies };
         using var client = new HttpClient(handler);

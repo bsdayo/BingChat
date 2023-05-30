@@ -25,9 +25,7 @@ internal sealed class BingChatRequest
     /// <param name="message">User message to Bing Chat</param>
     internal ChatRequest ConstructInitialPayload(string message)
     {
-        var bytes = (stackalloc byte[16]);
-        Random.Shared.NextBytes(bytes);
-        var traceId = Convert.ToHexString(bytes).ToLowerInvariant();
+        var traceId = Utils.GenerateRandomHexString();
 
         var payload = new ChatRequest
         {
