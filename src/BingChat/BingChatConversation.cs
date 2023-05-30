@@ -95,7 +95,8 @@ public sealed class BingChatConversation : IBingChattable
             .AsTask()
             .ContinueWith(response =>
             {
-                // TODO: Properly format references and links, and append them at the end of the message.
+                // TODO: Properly format source attributions and adaptive cards, and append them at the end of the message.
+                // This is best done by extracting formatting logic from one-shot BuildAnswer used by AskAsync.
                 if (messageId != null)
                 {
                     var completedMessage = response.Result.Messages
