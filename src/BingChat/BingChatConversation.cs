@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Connections;
+﻿using System.Runtime.CompilerServices;
+using System.Threading.Channels;
+using BingChat.Model;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.SignalR;
@@ -13,7 +16,7 @@ namespace BingChat;
 /// <summary>
 /// A chat conversation, enables us to chat multiple times in the same context.
 /// </summary>
-internal sealed class BingChatConversation : IBingChattable
+public sealed class BingChatConversation : IBingChattable
 {
     private static readonly HttpConnectionFactory ConnectionFactory = new(Options.Create(
         new HttpConnectionOptions
@@ -47,32 +50,72 @@ internal sealed class BingChatConversation : IBingChattable
     }
 
     /// <inheritdoc/>
-    public async Task<string> AskAsync(string message)
+    public async Task<string> AskAsync(string message, CancellationToken ct = default)
     {
         var request = _request.ConstructInitialPayload(message);
 
-        await using var conn = new HubConnection(
-            ConnectionFactory,
-            HubProtocol,
-            HubEndpoint,
-            new ServiceCollection().BuildServiceProvider(),
-            NullLoggerFactory.Instance);
-
-        await conn.StartAsync();
+        await using var conn = await Connect(ct);
 
         var response = await conn
-            .StreamAsync<BingChatConversationResponse>("chat", request)
-            .FirstAsync();
+            .StreamAsync<ChatResponse>("chat", request, ct)
+            .FirstAsync(ct);
 
         return BuildAnswer(response) ?? "<empty answer>";
     }
 
-    private static string? BuildAnswer(BingChatConversationResponse response)
+    /// <inheritdoc/>
+    public async IAsyncEnumerable<string> StreamAsync(
+        string message, [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        var request = _request.ConstructInitialPayload(message);
+        var chan = Channel.CreateUnbounded<string>();
+        var (rx, tx) = (chan.Reader, chan.Writer);
+
+        await using var conn = await Connect(ct);
+
+        var completedLength = 0;
+        var messageId = (string?)null;
+        using var updateCallback = conn.On<ChatResponse>("update", update =>
+        {
+            if (update.Messages is null or { Length: 0 })
+                return;
+
+            var message = update.Messages[0];
+            if (message is { MessageType: not null } or { Text: null or { Length: 0 } })
+                return;
+            if (messageId != (messageId ??= message.MessageId))
+                return;
+
+            tx.TryWrite(message.Text[completedLength..]);
+            completedLength = message.Text.Length;
+        });
+
+        var responseCallback = conn.StreamAsync<ChatResponse>("chat", request, ct)
+            .FirstAsync(ct)
+            .AsTask()
+            .ContinueWith(response =>
+            {
+                // TODO: Properly format references and links, and append them at the end of the message.
+                if (messageId != null)
+                {
+                    var completedMessage = response.Result.Messages
+                        .First(msg => msg.MessageId == messageId)
+                        .Text;
+                    if (completedMessage!.Length > completedLength)
+                        tx.TryWrite(completedMessage[completedLength..]);
+                }
+                tx.Complete();
+            }, ct);
+
+        await foreach (var word in rx.ReadAllAsync(ct)) yield return word;
+    }
+
+    private static string? BuildAnswer(ChatResponse response)
     {
         //Check status
-        if (!response.Result.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(response.Result?.Value, "Success", StringComparison.OrdinalIgnoreCase))
         {
-            throw new BingChatException($"{response.Result.Value}: {response.Result.Message}");
+            throw new BingChatException($"{response.Result?.Value}: {response.Result?.Message}");
         }
 
         //Collect messages, including of types: Chat, SearchQuery, LoaderMessage, Disengaged
@@ -123,5 +166,19 @@ internal sealed class BingChatConversation : IBingChattable
         }
 
         return messages.Count > 0 ? string.Join("\n\n", messages) : null;
+    }
+
+    private static async Task<HubConnection> Connect(CancellationToken ct)
+    {
+        var conn = new HubConnection(
+            ConnectionFactory,
+            HubProtocol,
+            HubEndpoint,
+            new ServiceCollection().BuildServiceProvider(),
+            NullLoggerFactory.Instance);
+
+        await conn.StartAsync(ct);
+
+        return conn;
     }
 }

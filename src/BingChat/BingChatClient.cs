@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
 using System.Web;
 
@@ -17,7 +18,7 @@ public sealed class BingChatClient : IBingChattable
     /// <summary>
     /// Create a chat conversation, so we can chat multiple times in the same context.
     /// </summary>
-    public async Task<IBingChattable> CreateConversation()
+    public async Task<BingChatConversation> CreateConversation()
     {
         var requestId = Guid.NewGuid();
 
@@ -107,18 +108,36 @@ public sealed class BingChatClient : IBingChattable
             throw new BingChatException(message);
         }
 
-        return new BingChatConversation(
-            response.ClientId, response.ConversationId, response.ConversationSignature, _options.Tone);
+        return new(
+            response.ClientId,
+            response.ConversationId,
+            response.ConversationSignature,
+            _options.Tone);
     }
 
     /// <summary>
     /// Create a one-shot conversation and ask in it. The conversation will be discarded after the operation.<br/>
     /// If you want to share the same context with multiple chat messages, use <see cref="CreateConversation"/> to create a shared conversation. 
     /// </summary>
-    public async Task<string> AskAsync(string message)
+    public async Task<string> AskAsync(string message, CancellationToken ct = default)
     {
         var conversation = await CreateConversation();
-        return await conversation.AskAsync(message);
+        return await conversation.AskAsync(message, ct);
+    }
+
+    /// <summary>
+    /// Create a one-shot conversation and ask in it. The conversation will be discarded after the operation.<br/>
+    /// If you want to share the same context with multiple chat messages, use <see cref="CreateConversation"/> to create a shared conversation.
+    /// </summary>
+    /// <returns>
+    /// Asynchronous stream consisting of response text words.
+    /// </returns>
+    public async IAsyncEnumerable<string> StreamAsync(
+        string message, [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        var conversation = await CreateConversation();
+        await foreach (var word in conversation.StreamAsync(message, ct))
+            yield return word;
     }
 }
 
