@@ -8,9 +8,9 @@ public sealed class AskCommand : AsyncCommand<AskCommand.Settings>
 {
     public class Settings : ChatCommandSettings
     {
-        [CommandArgument(0, "[message]")]
+        [CommandArgument(0, "<message>")]
         [Description("The message to ask")]
-        public required string[] Message { get; init; }
+        public string[] Message { get; init; } = Array.Empty<string>();
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
