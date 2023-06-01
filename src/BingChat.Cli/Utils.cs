@@ -9,7 +9,7 @@ internal static class Utils
         var cookie = Environment.GetEnvironmentVariable("BING_COOKIE");
         return new BingChatClient(new BingChatClientOptions
         {
-            CookieU = cookie,
+            CookieU = string.IsNullOrWhiteSpace(cookie) ? null : cookie,
             Tone = BingChatTone.Balanced,
         });
     }
@@ -57,6 +57,50 @@ internal static class Utils
                     .LeftJustified();
                 AnsiConsole.Write(rule);
                 AnsiConsole.MarkupLine(text);
+                AnsiConsole.WriteLine();
+                break;
+        }
+    }
+
+    public static async Task WriteAnswerStreamAsync(IAsyncEnumerable<string> answer, ChatCommandSettings settings)
+    {
+        switch (settings.Theme)
+        {
+            case ChatTheme.Bubble:
+            default:
+                var text = "";
+                await AnsiConsole.Live(new Text("")).StartAsync(async ctx =>
+                {
+                    await foreach (var segment in answer)
+                    {
+                        text += Markup.Escape(segment);
+                        var panel = new Panel(text)
+                            .Header("Bing", Justify.Left)
+                            .RoundedBorder();
+                        ctx.UpdateTarget(panel);
+                    }
+
+                    ctx.UpdateTarget(new Panel(text.Trim())
+                        .Header("Bing", Justify.Left)
+                        .RoundedBorder());
+                });
+
+                break;
+
+            case ChatTheme.Line:
+                var ruleWrote = false;
+                await foreach (var segment in answer)
+                {
+                    if (!ruleWrote)
+                    {
+                        var rule = new Rule("Bing")
+                            .LeftJustified();
+                        AnsiConsole.Write(rule);
+                    }
+
+                    AnsiConsole.Write(Markup.Escape(segment));
+                }
+
                 AnsiConsole.WriteLine();
                 break;
         }

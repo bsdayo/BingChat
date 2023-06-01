@@ -17,78 +17,95 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
         var client = Utils.GetClient();
         IBingChattable? conversation = null;
 
-        while (true)
+        try
         {
-            var text = AnsiConsole.Ask<string>("[blue bold]>[/]");
-            if (string.IsNullOrWhiteSpace(text)) continue;
-
-
-            if (text.StartsWith('/'))
+            while (true)
             {
-                var cmd = text.TrimStart('/');
-                switch (cmd)
+                try
                 {
-                    case "help":
-                        PrintHelp();
-                        break;
+                    var text = AnsiConsole.Ask<string>("[blue bold]>[/]");
+                    if (string.IsNullOrWhiteSpace(text)) continue;
 
-                    case "reset":
-                        conversation = null;
-                        break;
 
-                    case "theme":
-                        var args = cmd.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (args.Length < 2)
+                    if (text.StartsWith('/'))
+                    {
+                        var cmd = text.TrimStart('/');
+                        switch (cmd)
                         {
-                            AnsiConsole.MarkupLine("[red]Please specify the theme name. (bubble|line)[/]");
-                            break;
+                            case "help":
+                                PrintHelp();
+                                break;
+
+                            case "reset":
+                                conversation = null;
+                                break;
+
+                            case "theme":
+                                var args = cmd.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                if (args.Length < 2)
+                                {
+                                    AnsiConsole.MarkupLine("[red]Please specify the theme name. (bubble|line)[/]");
+                                    break;
+                                }
+
+                                if (!Enum.TryParse<ChatTheme>(args[1], out var theme))
+                                {
+                                    AnsiConsole.MarkupLine(
+                                        $"[red]Unknown theme {Markup.Escape(args[1])}. Valid values are bubble or line.[/]");
+                                    break;
+                                }
+
+                                settings.Theme = theme;
+                                break;
+
+                            case "exit":
+                                return 0;
+
+                            default:
+                                AnsiConsole.MarkupLine(
+                                    $"[red]Unknown command {Markup.Escape(cmd)}. You can enter /help for command usage.[/]");
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        IAsyncEnumerable<string> stream = null!;
+
+                        var pos = Console.GetCursorPosition();
+                        Console.SetCursorPosition(0, pos.Top - 1); // back to the last line
+                        Utils.WriteMessage(text, settings);
+
+                        if (conversation is null)
+                        {
+                            AnsiConsole.MarkupLine("[green]Creating new conversation...[/]");
+                            conversation = await client.CreateConversation();
                         }
 
-                        if (!Enum.TryParse<ChatTheme>(args[1], out var theme))
-                        {
-                            AnsiConsole.MarkupLine(
-                                $"[red]Unknown theme {Markup.Escape(args[1])}. Valid values are bubble or line.[/]");
-                            break;
-                        }
+                        AnsiConsole.Status()
+                            .Spinner(Spinner.Known.BouncingBar)
+                            .Start("Bing is thinking...", _ =>
+                                // ReSharper disable once AccessToModifiedClosure
+                                stream = conversation.StreamAsync(text));
 
-                        settings.Theme = theme;
-                        break;
+                        // if (answer.EndsWith("\n<Disengaged>"))
+                        // {
+                        //     conversation = null;
+                        //     answer = answer.Replace("\n<Disengaged>", "\nIt might be time to move onto a new topic. Let's start over.");
+                        // }
 
-                    case "exit":
-                        return 0;
-
-                    default:
-                        AnsiConsole.MarkupLine(
-                            $"[red]Unknown command {Markup.Escape(cmd)}. You can enter /help for command usage.[/]");
-                        break;
+                        await Utils.WriteAnswerStreamAsync(stream, settings);
+                    }
+                }
+                catch (Exception e)
+                {
+                    AnsiConsole.WriteException(e);
                 }
             }
-            else
-            {
-                var answer = string.Empty;
-
-                var pos = Console.GetCursorPosition();
-                Console.SetCursorPosition(0, pos.Top - 1); // back to the last line
-                Utils.WriteMessage(text, settings);
-
-                if (conversation is null)
-                {
-                    AnsiConsole.MarkupLine("[green]Creating new conversation...[/]");
-                    conversation = await client.CreateConversation();
-                }
-
-                await AnsiConsole.Status()
-                    .Spinner(Spinner.Known.BouncingBar)
-                    .StartAsync("Bing is thinking...", async _ => { answer = await conversation.AskAsync(text); });
-
-                if (answer.EndsWith("\n<Disengaged>"))
-                {
-                    conversation = null;
-                    answer = answer.Replace("\n<Disengaged>", "\nIt might be time to move onto a new topic. Let's start over.");
-                }
-
-                Utils.WriteAnswer(answer, settings);
-            }
+        }
+        catch (Exception e)
+        {
+            AnsiConsole.WriteException(e);
+            return 1;
         }
     }
 

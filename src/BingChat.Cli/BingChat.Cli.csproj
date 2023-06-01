@@ -8,12 +8,18 @@
         <AssemblyName>bing-chat</AssemblyName>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <PackageVersion>1.0.0</PackageVersion>
+        <ToolCommandName>bing-chat</ToolCommandName>
+        <PackAsTool>true</PackAsTool>
+    </PropertyGroup>
+
     <ItemGroup>
-      <ProjectReference Include="..\BingChat\BingChat.csproj" />
+        <ProjectReference Include="..\BingChat\BingChat.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Spectre.Console.Cli" Version="0.46.1-preview.0.7" />
+        <PackageReference Include="Spectre.Console.Cli" Version="0.46.1-preview.0.7"/>
     </ItemGroup>
 
 </Project>

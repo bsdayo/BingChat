@@ -15,18 +15,26 @@ public sealed class AskCommand : AsyncCommand<AskCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var client = Utils.GetClient();
-        var message = string.Join(' ', settings.Message);
-        var answer = string.Empty;
+        try
+        {
+            var client = Utils.GetClient();
+            var message = string.Join(' ', settings.Message);
+            var answer = string.Empty;
 
-        Utils.WriteMessage(message, settings);
-        
-        await AnsiConsole.Status()
-            .Spinner(Spinner.Known.BouncingBar)
-            .StartAsync("Bing is thinking...", async _ => { answer = await client.AskAsync(message); });
+            Utils.WriteMessage(message, settings);
 
-        Utils.WriteAnswer(answer, settings);
+            await AnsiConsole.Status()
+                .Spinner(Spinner.Known.BouncingBar)
+                .StartAsync("Bing is thinking...", async _ => { answer = await client.AskAsync(message); });
 
-        return 0;
+            Utils.WriteAnswer(answer, settings);
+
+            return 0;
+        }
+        catch (Exception e)
+        {
+            AnsiConsole.WriteException(e);
+            return 1;
+        }
     }
 }
