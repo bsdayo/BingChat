@@ -29,7 +29,7 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
 
                     if (text.StartsWith('/'))
                     {
-                        var cmd = text.TrimStart('/');
+                        var cmd = text.TrimStart('/').Split(' ')[0];
                         switch (cmd)
                         {
                             case "help":
@@ -41,7 +41,7 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                                 break;
 
                             case "theme":
-                                var args = cmd.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                var args = text.TrimStart('/').Split(' ', StringSplitOptions.RemoveEmptyEntries);
                                 if (args.Length < 2)
                                 {
                                     AnsiConsole.MarkupLine("[red]Please specify the theme name. (bubble|line)[/]");
@@ -69,7 +69,7 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                     }
                     else
                     {
-                        IAsyncEnumerable<string> stream = null!;
+                        IAsyncEnumerable<string> stream;
 
                         var pos = Console.GetCursorPosition();
                         Console.SetCursorPosition(0, pos.Top - 1); // back to the last line
@@ -81,11 +81,14 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                             conversation = await client.CreateConversation();
                         }
 
-                        AnsiConsole.Status()
-                            .Spinner(Spinner.Known.BouncingBar)
-                            .Start("Bing is thinking...", _ =>
-                                // ReSharper disable once AccessToModifiedClosure
-                                stream = conversation.StreamAsync(text));
+                        AnsiConsole.MarkupLine("[yellow]Bing is thinking...[/]");
+                        stream = conversation.StreamAsync(text);
+
+                        // AnsiConsole.Status()
+                        //     .Spinner(Spinner.Known.BouncingBar)
+                        //     .Start("Bing is thinking...", _ =>
+                        //         // ReSharper disable once AccessToModifiedClosure
+                        //         stream = conversation.StreamAsync(text));
 
                         // if (answer.EndsWith("\n<Disengaged>"))
                         // {

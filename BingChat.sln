@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BingChat", "src\BingChat\Bi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BingChat.Examples", "examples\BingChat.Examples\BingChat.Examples.csproj", "{FB8F9A10-656C-427B-9A7F-832BB83F8050}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BingChat.Cli", "src\BingChat.Cli\BingChat.Cli.csproj", "{F87062C7-221E-421C-99D6-FF85E0CF887C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-bingchat", "src\dotnet-bingchat\dotnet-bingchat.csproj", "{F87062C7-221E-421C-99D6-FF85E0CF887C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

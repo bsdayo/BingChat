@@ -5,12 +5,11 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AssemblyName>bing-chat</AssemblyName>
+        <RootNamespace>BingChat.Cli</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup>
         <PackageVersion>1.0.0</PackageVersion>
-        <ToolCommandName>bing-chat</ToolCommandName>
         <PackAsTool>true</PackAsTool>
     </PropertyGroup>
 

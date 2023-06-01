@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using System.Text;
+using Spectre.Console;
 
 namespace BingChat.Cli;
 
@@ -68,23 +69,37 @@ internal static class Utils
         {
             case ChatTheme.Bubble:
             default:
-                var text = "";
-                await AnsiConsole.Live(new Text("")).StartAsync(async ctx =>
+                var initialPanel = new Panel("")
+                    .Header("Bing", Justify.Left)
+                    .RoundedBorder();
+                await AnsiConsole.Live(initialPanel).StartAsync(async ctx =>
                 {
+                    var sb = new StringBuilder();
+                    var lastIsLineBreak = false;
                     await foreach (var segment in answer)
                     {
-                        text += Markup.Escape(segment);
-                        var panel = new Panel(text)
-                            .Header("Bing", Justify.Left)
-                            .RoundedBorder();
-                        ctx.UpdateTarget(panel);
+                        foreach (var letter in segment)
+                        {
+                            if (letter == '\n')
+                            {
+                                lastIsLineBreak = true;
+                                continue;
+                            }
+
+                            if (lastIsLineBreak)
+                            {
+                                sb.Append("\n\n");
+                                lastIsLineBreak = false;
+                            }
+
+                            sb.Append(Markup.Escape(letter.ToString()));
+                            var panel = new Panel(sb.ToString())
+                                .Header("Bing", Justify.Left)
+                                .RoundedBorder();
+                            ctx.UpdateTarget(panel);
+                        }
                     }
-
-                    ctx.UpdateTarget(new Panel(text.Trim())
-                        .Header("Bing", Justify.Left)
-                        .RoundedBorder());
                 });
-
                 break;
 
             case ChatTheme.Line:
