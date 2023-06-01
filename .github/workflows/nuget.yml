@@ -17,7 +17,6 @@ jobs:
           dotnet-version: 6.x.x
 
       - name: Publish NuGet package
-        id: publish
         uses: alirezanet/publish-nuget@v3.0.4
         with:
           PROJECT_FILE_PATH: src/BingChat/BingChat.csproj
@@ -26,4 +25,14 @@ jobs:
           VERSION_REGEX: ^\s*<PackageVersion>(.*)<\/PackageVersion>\s*$
           TAG_COMMIT: true
           TAG_FORMAT: v*
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+      - name: Publish CLI
+        uses: alirezanet/publish-nuget@v3.0.4
+        with:
+          PROJECT_FILE_PATH: src/dotnet-bingchat/dotnet-bingchat.csproj
+          PACKAGE_NAME: dotnet-bingchat
+          VERSION_FILE_PATH: src/dotnet-bingchat/dotnet-bingchat.csproj
+          VERSION_REGEX: ^\s*<PackageVersion>(.*)<\/PackageVersion>\s*$
+          TAG_COMMIT: false
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
