@@ -10,7 +10,7 @@ public sealed class AskCommand : AsyncCommand<AskCommand.Settings>
     {
         [CommandArgument(0, "<message>")]
         [Description("The message to ask")]
-        public string[] Message { get; init; } = Array.Empty<string>();
+        public required string[] Message { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
