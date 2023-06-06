@@ -38,5 +38,5 @@ public sealed class BingChatClientOptions
     /// <summary>
     /// Optional Proxy used for requests
     /// </summary>
-    public WebProxy? Proxy { get; set; } = new WebProxy();
+    public WebProxy? Proxy { get; set; }
 }
