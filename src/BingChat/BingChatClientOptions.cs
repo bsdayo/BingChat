@@ -1,4 +1,6 @@
-﻿namespace BingChat;
+﻿using System.Net;
+
+namespace BingChat;
 
 public enum BingChatTone : int
 {
@@ -32,4 +34,9 @@ public sealed class BingChatClientOptions
     /// Tone used for conversation (Default: Balanced)
     /// </summary>
     public BingChatTone Tone { get; set; }
+    
+    /// <summary>
+    /// Optional Proxy used for requests
+    /// </summary>
+    public WebProxy? Proxy { get; set; } = new WebProxy();
 }
