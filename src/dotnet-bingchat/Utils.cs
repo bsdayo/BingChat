@@ -5,13 +5,13 @@ namespace BingChat.Cli;
 
 internal static class Utils
 {
-    public static BingChatClient GetClient()
+    public static BingChatClient GetClient(BingChatTone tone)
     {
         var cookie = Environment.GetEnvironmentVariable("BING_COOKIE");
         return new BingChatClient(new BingChatClientOptions
         {
             CookieU = string.IsNullOrWhiteSpace(cookie) ? null : cookie,
-            Tone = BingChatTone.Balanced,
+            Tone = tone,
         });
     }
 
@@ -103,17 +103,14 @@ internal static class Utils
                 break;
 
             case ChatTheme.Line:
-                var ruleWrote = false;
+                var writeRule = () => AnsiConsole
+                    .Write(new Rule("Bing").LeftJustified());
+
                 await foreach (var segment in answer)
                 {
-                    if (!ruleWrote)
-                    {
-                        var rule = new Rule("Bing")
-                            .LeftJustified();
-                        AnsiConsole.Write(rule);
-                    }
-
-                    AnsiConsole.Write(Markup.Escape(segment));
+                    writeRule?.Invoke();
+                    writeRule = null;
+                    AnsiConsole.Write(Markup.Escape(segment.Replace("\n", "\n\n")));
                 }
 
                 AnsiConsole.WriteLine();

@@ -14,8 +14,9 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
         AnsiConsole.MarkupLine("[green bold]Welcome to Bing Chat![/]");
         AnsiConsole.MarkupLine("Enter message to chat with Bing, or enter [yellow]/help[/] to get command help.");
 
-        var client = Utils.GetClient();
-        IBingChattable? conversation = null;
+        var tone = BingChatTone.Balanced;
+        var client = (BingChatClient?)null;
+        var conversation = (BingChatConversation?)null;
 
         try
         {
@@ -25,7 +26,6 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                 {
                     var text = AnsiConsole.Ask<string>("[blue bold]>[/]");
                     if (string.IsNullOrWhiteSpace(text)) continue;
-
 
                     if (text.StartsWith('/'))
                     {
@@ -37,6 +37,8 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                                 break;
 
                             case "reset":
+                                tone = BingChatTone.Balanced;
+                                client = null;
                                 conversation = null;
                                 break;
 
@@ -48,7 +50,7 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                                     break;
                                 }
 
-                                if (!Enum.TryParse<ChatTheme>(args[1], out var theme))
+                                if (!Enum.TryParse<ChatTheme>(args[1], ignoreCase: true, out var theme))
                                 {
                                     AnsiConsole.MarkupLine(
                                         $"[red]Unknown theme {Markup.Escape(args[1])}. Valid values are bubble or line.[/]");
@@ -56,6 +58,23 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                                 }
 
                                 settings.Theme = theme;
+                                break;
+
+                            case "tone":
+                                var toneArgs = text.TrimStart('/').Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                if (toneArgs.Length < 2)
+                                {
+                                    AnsiConsole.MarkupLine("[red]Please specify the tone name. (balanced|creative|precise)[/]");
+                                    break;
+                                }
+
+                                if (!Enum.TryParse(text.TrimStart('/').Split(' ')[1], ignoreCase: true, out tone))
+                                {
+                                    AnsiConsole.MarkupLine(
+                                        $"[red]Unknown tone {Markup.Escape(toneArgs[1])}. Valid values are balanced, creative or precise.[/]");
+                                    break;
+                                }
+
                                 break;
 
                             case "exit":
@@ -69,20 +88,20 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
                     }
                     else
                     {
-                        IAsyncEnumerable<string> stream;
-
                         var pos = Console.GetCursorPosition();
                         Console.SetCursorPosition(0, pos.Top - 1); // back to the last line
                         Utils.WriteMessage(text, settings);
 
                         if (conversation is null)
                         {
+                            client ??= Utils.GetClient(tone);
+
                             AnsiConsole.MarkupLine("[green]Creating new conversation...[/]");
                             conversation = await client.CreateConversation();
                         }
 
                         AnsiConsole.MarkupLine("[yellow]Bing is thinking...[/]");
-                        stream = conversation.StreamAsync(text);
+                        var stream = conversation.StreamAsync(text);
 
                         // AnsiConsole.Status()
                         //     .Spinner(Spinner.Known.BouncingBar)
@@ -123,6 +142,7 @@ public sealed class ConversationCommand : AsyncCommand<ConversationCommand.Setti
         table.AddRow("[yellow]/help[/]", "Print command help");
         table.AddRow("[yellow]/reset[/]", "Reset current conversation");
         table.AddRow("[yellow]/theme <bubble|line>[/]", "Change current theme");
+        table.AddRow("[yellow]/tone <balanced|creative|precise>[/]", "Change current tone");
         table.AddRow("[yellow]/exit[/]", "Exit chat");
 
         AnsiConsole.Write(table);

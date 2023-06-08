@@ -17,7 +17,7 @@ public sealed class AskCommand : AsyncCommand<AskCommand.Settings>
     {
         try
         {
-            var client = Utils.GetClient();
+            var client = Utils.GetClient(BingChatTone.Balanced);
             var message = string.Join(' ', settings.Message);
             var answer = string.Empty;
 
