@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using BingChat.Model;
 using Microsoft.AspNetCore.Connections;
@@ -178,8 +179,19 @@ public sealed class BingChatConversation : IBingChattable
             new ServiceCollection().BuildServiceProvider(),
             NullLoggerFactory.Instance);
 
-        await conn.StartAsync(ct);
+        var attempts = 3;
+    retry:
+        try
+        {
+            await conn.StartAsync(ct);
+            return conn;
+        }
+        catch (WebSocketException)
+        {
+            if (--attempts > 0)
+                goto retry;
 
-        return conn;
+            throw;
+        }
     }
 }
