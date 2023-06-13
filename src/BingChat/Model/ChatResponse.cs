@@ -8,7 +8,7 @@ namespace BingChat.Model;
 
 internal sealed class ChatResponse
 {
-    public ResponseMessage[] Messages { get; set; }
+    public ResponseMessage[]? Messages { get; set; }
     public ResponseResult? Result { get; set; }
 }
 
@@ -24,7 +24,7 @@ internal sealed class ResponseMessage
 
 internal sealed class AdaptiveCard
 {
-    public ResponseBody[] Body { get; set; }
+    public ResponseBody[]? Bodies { get; set; }
 }
 
 internal sealed class ResponseBody

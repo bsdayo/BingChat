@@ -60,7 +60,7 @@ public sealed class BingChatConversation : IBingChattable
             .StreamAsync<ChatResponse>("chat", request, ct)
             .FirstAsync(ct);
 
-        return BuildAnswer(response) ?? "<empty answer>";
+        return BingChatParser.ParseMessage(response) ?? "<empty answer>";
     }
 
     /// <inheritdoc/>
@@ -70,24 +70,19 @@ public sealed class BingChatConversation : IBingChattable
         var request = _request.ConstructInitialPayload(message);
         var chan = Channel.CreateUnbounded<string>();
         var (rx, tx) = (chan.Reader, chan.Writer);
+        var responses = new List<ChatResponse>();
 
         await using var conn = await Connect(ct);
 
         var completedLength = 0;
-        var messageId = (string?)null;
         using var updateCallback = conn.On<ChatResponse>("update", update =>
         {
-            if (update.Messages is null or { Length: 0 })
-                return;
-
-            var message = update.Messages[0];
-            if (message is { MessageType: not null } or { Text: null or { Length: 0 } })
-                return;
-            if (messageId != (messageId ??= message.MessageId))
-                return;
-
-            tx.TryWrite(message.Text[completedLength..]);
-            completedLength = message.Text.Length;
+            responses.Add(update);
+            var answer = BingChatParser.ParseMessage(responses);
+            if (answer is null) return;
+            if (answer.Length > completedLength)
+                tx.TryWrite(answer[completedLength..]);
+            completedLength = answer.Length;
         });
 
         var responseCallback = conn.StreamAsync<ChatResponse>("chat", request, ct)
@@ -95,78 +90,14 @@ public sealed class BingChatConversation : IBingChattable
             .AsTask()
             .ContinueWith(response =>
             {
-                // TODO: Properly format source attributions and adaptive cards, and append them at the end of the message.
-                // This is best done by extracting formatting logic from one-shot BuildAnswer used by AskAsync.
-                if (messageId != null)
-                {
-                    var completedMessage = response.Result.Messages
-                        .First(msg => msg.MessageId == messageId)
-                        .Text;
-                    if (completedMessage!.Length > completedLength)
-                        tx.TryWrite(completedMessage[completedLength..]);
-                }
+                responses.Add(response.Result);
+                var answer = BingChatParser.ParseMessage(responses) ?? "<empty answer>";
+                if (answer.Length > completedLength)
+                    tx.TryWrite(answer[completedLength..]);
                 tx.Complete();
             }, ct);
 
         await foreach (var word in rx.ReadAllAsync(ct)) yield return word;
-    }
-
-    private static string? BuildAnswer(ChatResponse response)
-    {
-        //Check status
-        if (!string.Equals(response.Result?.Value, "Success", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new BingChatException($"{response.Result?.Value}: {response.Result?.Message}");
-        }
-
-        //Collect messages, including of types: Chat, SearchQuery, LoaderMessage, Disengaged
-        var messages = new List<string>();
-        foreach (var itemMessage in response.Messages)
-        {
-            //Not needed
-            if (itemMessage.Author != "bot") continue;
-            if (itemMessage.MessageType is "InternalSearchResult" or "RenderCardRequest")
-                continue;
-
-            //Not supported
-            if (itemMessage.MessageType is "GenerateContentQuery")
-                continue;
-
-            //From Text
-            var text = itemMessage.Text;
-
-            //From AdaptiveCards
-            var adaptiveCards = itemMessage.AdaptiveCards;
-            if (text is null && adaptiveCards?.Length > 0)
-            {
-                var bodies = new List<string>();
-                foreach (var body in adaptiveCards[0].Body)
-                {
-                    if (body.Type != "TextBlock" || body.Text is null) continue;
-                    bodies.Add(body.Text);
-                }
-                text = bodies.Count > 0 ? string.Join("\n", bodies) : null;
-            }
-
-            //From MessageType
-            text ??= $"<{itemMessage.MessageType}>";
-
-            //From SourceAttributions
-            var sourceAttributions = itemMessage.SourceAttributions;
-            if (sourceAttributions?.Length > 0)
-            {
-                text += "\n";
-                for (var nIndex = 0; nIndex < sourceAttributions.Length; nIndex++)
-                {
-                    var sourceAttribution = sourceAttributions[nIndex];
-                    text += $"\n[{nIndex + 1}]: {sourceAttribution.SeeMoreUrl} \"{sourceAttribution.ProviderDisplayName}\"";
-                }
-            }
-
-            messages.Add(text);
-        }
-
-        return messages.Count > 0 ? string.Join("\n\n", messages) : null;
     }
 
     private static async Task<HubConnection> Connect(CancellationToken ct)
