@@ -1,7 +1,5 @@
 ﻿<div align="center">
 
-![Socialify Banner](https://socialify.git.ci/bsdayo/BingChat/image?font=Inter&language=1&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F9%2F9c%2FBing_Fluent_Logo.svg&name=1&owner=1&pattern=Circuit%20Board&theme=Auto&description=1)
-
 # BingChat
 
 .NET API wrapper for Microsoft's new AI-powered Bing Chat.
@@ -11,6 +9,10 @@
 [![License](https://img.shields.io/badge/License-MIT-brightgreen)](./LICENSE)
 
 </div>
+
+> **Warning**
+> OUT OF MAINTENANCE  
+> I'm no longer interested in this project. Contact me if someone want to take over.
 
 > **Warning**
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
