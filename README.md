@@ -11,8 +11,10 @@
 </div>
 
 > **Warning**
-> OUT OF MAINTENANCE  
-> I'm no longer interested in this project. Contact me if someone want to take over.
+> OUT OF DATE  
+> Currently, the implementation is out of sync with the recent API changes which lead to frequent errors and trigger captcha.
+> It is planned to investigate this and align the implementation with official API clients (iOS app and Browser)
+> to reduce these issues or completely mitigate them if such possibility exists.
 
 > **Warning**
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
@@ -100,7 +102,9 @@ dotnet bingchat
 - [x] Provide a way to get the full result, like adaptive cards
 - [x] Add ability to set timeout
 - [x] Publish CLI as dotnet tool
-- [ ] Validate that connectivity issues are gone after switching to SignalR
+- [x] Validate that connectivity issues are gone after switching to SignalR
+- [ ] Investigate BingChat iOS app and Browser changes to mitigate overzelous captcha requests
+- [ ] Investigate API spec changes to bring implementation in line with changed API contracts
 - [ ] Research OptionSet specifics, analyze whether switching to `harmonyv3` enables the older model which has better
   performance
 - [ ] Expose rich response object via `.SendAsync(..)` to allow detailed access and control over the conversation state
