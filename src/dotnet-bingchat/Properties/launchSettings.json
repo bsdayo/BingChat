@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "dotnet-bingchat": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "BING_COOKIES_FILE": "D:\\cookies.json"
+      }
+    }
+  }
+}
