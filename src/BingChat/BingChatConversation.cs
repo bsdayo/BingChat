@@ -33,7 +33,7 @@ public sealed class BingChatConversation : IBingChattable
     private readonly string? _encryptedConversationSignature;
     private readonly CookieContainer _cookies;
     internal BingChatConversation(
-        string clientId, string conversationId, string conversationSignature, BingChatTone tone, string? encryptedConversationSignature = null, CookieContainer cookies = null)
+        string clientId, string conversationId, string conversationSignature, BingChatTone tone, string? encryptedConversationSignature, CookieContainer cookies)
     {
         _request = new BingChatRequest(clientId, conversationId, conversationSignature, tone);
         _encryptedConversationSignature = encryptedConversationSignature;
@@ -45,7 +45,7 @@ public sealed class BingChatConversation : IBingChattable
     {
         var request = _request.ConstructInitialPayload(message);
 
-        await using var conn = await Connect(ct: ct);
+        await using var conn = await Connect(ct);
 
         var response = await conn
             .StreamAsync<ChatResponse>("chat", request, ct)
@@ -62,7 +62,7 @@ public sealed class BingChatConversation : IBingChattable
         var chan = Channel.CreateUnbounded<string>();
         var (rx, tx) = (chan.Reader, chan.Writer);
 
-        await using var conn = await Connect(ct: ct);
+        await using var conn = await Connect(ct);
 
         var completedLength = 0;
         var messageId = (string?)null;

@@ -60,7 +60,7 @@ public sealed class BingChatClient : IBingChattable
                     {
                         cookies.Add(new Cookie(name, value, path, domain));
                     }
-                    catch (Exception ex)
+                    catch 
                     {
                         cookies.Add(new Cookie(name, HttpUtility.UrlEncode(value), path, domain));
                     }
