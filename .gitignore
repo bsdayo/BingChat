@@ -7,3 +7,4 @@ riderModule.iml
 .DS_Store
 build/
 publish/
+.vs/

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
 
@@ -101,12 +102,8 @@ public sealed class BingChatClient : IBingChattable
 
         var rawResponse = await client.GetAsync("https://www.bing.com/turing/conversation/create?bundleVersion=1.1135.1");
 
-        var response = await rawResponse.Content.ReadFromJsonAsync<BingCreateConversationResponse>();
-
-        //var response = await client.GetFromJsonAsync(
-        //    "https://www.bing.com/turing/conversation/create",
-        //    SerializerContext.Default.BingCreateConversationResponse);
-
+        var response = (BingCreateConversationResponse?)await rawResponse.Content.ReadFromJsonAsync(typeof(BingCreateConversationResponse),SerializerContext.Default);
+        
         if (response!.Result is { } errResult &&
             !errResult.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
         {
@@ -117,9 +114,9 @@ public sealed class BingChatClient : IBingChattable
                            + "You can use a proxy and try again.";
             throw new BingChatException(message);
         }
-        var val = rawResponse.Headers.GetValues("X-Sydney-EncryptedConversationSignature");
-        var encryptedConversationSignature = val.FirstOrDefault();
 
+        var encryptedConversationSignature = rawResponse.Headers.GetValues("X-Sydney-EncryptedConversationSignature").FirstOrDefault();
+         
         return new(
             response.ClientId,
             response.ConversationId,

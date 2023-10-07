@@ -21,21 +21,6 @@ namespace BingChat;
 /// </summary>
 public sealed class BingChatConversation : IBingChattable
 {
-    //private readonly HttpConnectionFactory ConnectionFactory = new(Options.Create(
-    //    new HttpConnectionOptions
-    //    {
-    //        DefaultTransferFormat = TransferFormat.Text,
-    //        SkipNegotiation = true,
-    //        Transports = HttpTransportType.WebSockets,
-    //        Cookies = _cookies,
-    //        Headers =
-    //        {
-    //            ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.47",
-    //            ["Origin"] = "https://www.bing.com"
-    //        }
-    //    }),
-    //    NullLoggerFactory.Instance);
-
     private static readonly JsonHubProtocol HubProtocol = new(
         Options.Create(new JsonHubProtocolOptions()
         {
@@ -43,8 +28,6 @@ public sealed class BingChatConversation : IBingChattable
         }));
 
     private static readonly DefaultRetryPolicy DefaultRetryPolicy = new();
-
-    //private static readonly UriEndPoint HubEndpoint = new(new Uri("wss://sydney.bing.com/sydney/ChatHub"));
 
     private readonly BingChatRequest _request;
     private readonly string? _encryptedConversationSignature;
@@ -184,9 +167,7 @@ public sealed class BingChatConversation : IBingChattable
         return messages.Count > 0 ? string.Join("\n\n", messages) : null;
     }
 
-    private HttpConnectionFactory CreateConnectionFactory()
-    {
-        return new(Options.Create(
+    private HttpConnectionFactory CreateConnectionFactory() => new(Options.Create(
                 new HttpConnectionOptions
                 {
                     DefaultTransferFormat = TransferFormat.Text,
@@ -200,7 +181,7 @@ public sealed class BingChatConversation : IBingChattable
                     }
                 }),
             NullLoggerFactory.Instance);
-    }
+
     private async Task<HubConnection> Connect(CancellationToken ct = default)
     {
         var uri = this._encryptedConversationSignature == null
@@ -234,7 +215,6 @@ public sealed class BingChatConversation : IBingChattable
                 else throw;
             }
         }
-
 
         return conn;
     }
