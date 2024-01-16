@@ -11,10 +11,12 @@
 </div>
 
 > **Warning**
-> OUT OF DATE  
+> OUT OF DATE & MAINTENANCE  
 > Currently, the implementation is out of sync with the recent API changes which lead to frequent errors and trigger captcha.
 > It is planned to investigate this and align the implementation with official API clients (iOS app and Browser)
 > to reduce these issues or completely mitigate them if such possibility exists.
+>
+> Also, this repository is lack of maintainers for a long time. If anyone want to take over, please contact me.
 
 > **Warning**
 > This library is **unofficial** and heavily depends on reverse-engineering. Use at your own risk.
