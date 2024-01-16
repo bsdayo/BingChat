@@ -90,23 +90,30 @@ public sealed class BingChatConversation : IBingChattable
             completedLength = message.Text.Length;
         });
 
+        void CompleteAction(Task<ChatResponse> response)
+        {
+            if (response.IsFaulted)
+            {
+                tx.TryWrite(response.Exception?.Message ?? "<unknown error>");
+            }
+            else if (response.IsCompletedSuccessfully)
+            {
+                // Properly format source attributions and adaptive cards, and append them at the end of the message.
+                // This is best done by extracting formatting logic from one-shot BuildAnswer used by AskAsync.
+                var answer = BuildAnswer(response.Result);
+                if (answer is not null)
+                {
+                    tx.TryWrite(answer);
+                }
+            }
+            
+            tx.Complete();
+        }
+        
         var responseCallback = conn.StreamAsync<ChatResponse>("chat", request, ct)
             .FirstAsync(ct)
             .AsTask()
-            .ContinueWith(response =>
-            {
-                // TODO: Properly format source attributions and adaptive cards, and append them at the end of the message.
-                // This is best done by extracting formatting logic from one-shot BuildAnswer used by AskAsync.
-                if (messageId != null)
-                {
-                    var completedMessage = response.Result.Messages
-                        .First(msg => msg.MessageId == messageId)
-                        .Text;
-                    if (completedMessage!.Length > completedLength)
-                        tx.TryWrite(completedMessage[completedLength..]);
-                }
-                tx.Complete();
-            }, ct);
+            .ContinueWith(CompleteAction, ct);
 
         await foreach (var word in rx.ReadAllAsync(ct)) yield return word;
     }
