@@ -1,5 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Net;
+using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
+using System.Web;
 using BingChat.Model;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Http.Connections;
@@ -18,35 +21,23 @@ namespace BingChat;
 /// </summary>
 public sealed class BingChatConversation : IBingChattable
 {
-    private static readonly HttpConnectionFactory ConnectionFactory = new(Options.Create(
-        new HttpConnectionOptions
-        {
-            DefaultTransferFormat = TransferFormat.Text,
-            SkipNegotiation = true,
-            Transports = HttpTransportType.WebSockets,
-            Headers =
-            {
-                ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                                "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                                "Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57"
-            }
-        }),
-        NullLoggerFactory.Instance);
-
     private static readonly JsonHubProtocol HubProtocol = new(
         Options.Create(new JsonHubProtocolOptions()
         {
             PayloadSerializerOptions = SerializerContext.Default.Options
         }));
 
-    private static readonly UriEndPoint HubEndpoint = new(new Uri("wss://sydney.bing.com/sydney/ChatHub"));
+    private static readonly DefaultRetryPolicy DefaultRetryPolicy = new();
 
     private readonly BingChatRequest _request;
-
+    private readonly string? _encryptedConversationSignature;
+    private readonly CookieContainer _cookies;
     internal BingChatConversation(
-        string clientId, string conversationId, string conversationSignature, BingChatTone tone)
+        string clientId, string conversationId, string conversationSignature, BingChatTone tone, string? encryptedConversationSignature, CookieContainer cookies)
     {
         _request = new BingChatRequest(clientId, conversationId, conversationSignature, tone);
+        _encryptedConversationSignature = encryptedConversationSignature;
+        this._cookies = cookies;
     }
 
     /// <inheritdoc/>
@@ -99,11 +90,18 @@ public sealed class BingChatConversation : IBingChattable
                 // This is best done by extracting formatting logic from one-shot BuildAnswer used by AskAsync.
                 if (messageId != null)
                 {
-                    var completedMessage = response.Result.Messages
-                        .First(msg => msg.MessageId == messageId)
-                        .Text;
-                    if (completedMessage!.Length > completedLength)
-                        tx.TryWrite(completedMessage[completedLength..]);
+                    if (response.Result.Messages.Any(s => s.MessageType == "Disengaged"))
+                    {
+                        tx.TryWrite("Chat Bot Disengaged");
+                    }
+                    else
+                    {
+                        var completedMessage = response.Result.Messages
+                            .First(msg => msg.MessageId == messageId)
+                            .Text;
+                        if (completedMessage!.Length > completedLength)
+                            tx.TryWrite(completedMessage[completedLength..]);
+                    }
                 }
                 tx.Complete();
             }, ct);
@@ -169,16 +167,54 @@ public sealed class BingChatConversation : IBingChattable
         return messages.Count > 0 ? string.Join("\n\n", messages) : null;
     }
 
-    private static async Task<HubConnection> Connect(CancellationToken ct)
-    {
-        var conn = new HubConnection(
-            ConnectionFactory,
-            HubProtocol,
-            HubEndpoint,
-            new ServiceCollection().BuildServiceProvider(),
+    private HttpConnectionFactory CreateConnectionFactory() => new(Options.Create(
+                new HttpConnectionOptions
+                {
+                    DefaultTransferFormat = TransferFormat.Text,
+                    SkipNegotiation = true,
+                    Transports = HttpTransportType.WebSockets,
+                    Cookies = _cookies,
+                    Headers =
+                    {
+                        ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.47",
+                        ["Origin"] = "https://www.bing.com"
+                    }
+                }),
             NullLoggerFactory.Instance);
 
-        await conn.StartAsync(ct);
+    private async Task<HubConnection> Connect(CancellationToken ct = default)
+    {
+        var uri = this._encryptedConversationSignature == null
+            ? "wss://sydney.bing.com/sydney/ChatHub"
+            : $"wss://sydney.bing.com/sydney/ChatHub?sec_access_token={HttpUtility.UrlEncode(_encryptedConversationSignature)}";
+
+        var conn = new HubConnection(
+            CreateConnectionFactory(),
+            HubProtocol,
+            new UriEndPoint(new Uri(uri)),
+            new ServiceCollection().BuildServiceProvider(),
+            NullLoggerFactory.Instance,
+            DefaultRetryPolicy);
+
+        //Retry on SSL connection error.
+        int retry = 0;
+        while (true)
+        {
+            try
+            {
+                await conn.StartAsync(ct);
+                break;
+            }
+            catch (WebSocketException)
+            {
+                Thread.Sleep(100);
+                if (retry < 5)
+                {
+                    retry++;
+                }
+                else throw;
+            }
+        }
 
         return conn;
     }

@@ -7,10 +7,14 @@ public static partial class Examples
         // Get the Bing "_U" cookie from wherever you like
         var cookie = Environment.GetEnvironmentVariable("BING_COOKIE");
 
+        // Get the Bing cookie file path
+        var cookieFile = Environment.GetEnvironmentVariable("BING_COOKIES_FILE");
+
         // Construct the chat client
         var client = new BingChatClient(new BingChatClientOptions
         {
             CookieU = cookie,
+            CookieFilePath = cookieFile,
             Tone = BingChatTone.Creative,
         });
 

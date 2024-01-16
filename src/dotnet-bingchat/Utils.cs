@@ -8,9 +8,12 @@ internal static class Utils
     public static BingChatClient GetClient(BingChatTone tone)
     {
         var cookie = Environment.GetEnvironmentVariable("BING_COOKIE");
+        var cookieFile = Environment.GetEnvironmentVariable("BING_COOKIES_FILE");
+        
         return new BingChatClient(new BingChatClientOptions
         {
             CookieU = string.IsNullOrWhiteSpace(cookie) ? null : cookie,
+            CookieFilePath = string.IsNullOrEmpty(cookieFile)? null: cookieFile,
             Tone = tone,
         });
     }

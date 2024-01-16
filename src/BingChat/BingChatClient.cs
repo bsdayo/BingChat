@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
 
@@ -41,6 +42,7 @@ public sealed class BingChatClient : IBingChattable
             {
                 JsonNode? cookieJson = JsonNode.Parse(File.ReadAllText(_options.CookieFilePath));
                 cookies = new CookieContainer();
+                cookies.PerDomainCapacity = 100;
                 foreach (var cookieItemJson in (JsonArray)cookieJson!)
                 {
                     if (cookieItemJson is null)
@@ -54,8 +56,14 @@ public sealed class BingChatClient : IBingChattable
                         string.IsNullOrEmpty(name) ||
                         string.IsNullOrEmpty(value))
                         continue;
-                    cookies.Add(new Uri("https://www.bing.com"),
-                        new Cookie(name, HttpUtility.UrlEncode(value), path, domain));
+                    try
+                    {
+                        cookies.Add(new Cookie(name, value, path, domain));
+                    }
+                    catch 
+                    {
+                        cookies.Add(new Cookie(name, HttpUtility.UrlEncode(value), path, domain));
+                    }
                 }
             }
             catch
@@ -88,14 +96,14 @@ public sealed class BingChatClient : IBingChattable
         headers.Add("sec-fetch-site", "same-origin");
         headers.Add("x-edge-shopping-flag", "1");
         headers.Add("x-ms-client-request-id", requestId.ToString().ToLower());
-        headers.Add("x-ms-useragent", "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/MacIntel");
+        headers.Add("x-ms-useragent", "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.12.0 OS/Windows");
         headers.Add("referer", "https://www.bing.com/search");
         headers.Add("referer-policy", "origin-when-cross-origin");
 
-        var response = await client.GetFromJsonAsync(
-            "https://www.bing.com/turing/conversation/create",
-            SerializerContext.Default.BingCreateConversationResponse);
+        var rawResponse = await client.GetAsync("https://www.bing.com/turing/conversation/create?bundleVersion=1.1135.1");
 
+        var response = (BingCreateConversationResponse?)await rawResponse.Content.ReadFromJsonAsync(typeof(BingCreateConversationResponse),SerializerContext.Default);
+        
         if (response!.Result is { } errResult &&
             !errResult.Value.Equals("Success", StringComparison.OrdinalIgnoreCase))
         {
@@ -107,11 +115,15 @@ public sealed class BingChatClient : IBingChattable
             throw new BingChatException(message);
         }
 
+        var encryptedConversationSignature = rawResponse.Headers.GetValues("X-Sydney-EncryptedConversationSignature").FirstOrDefault();
+         
         return new(
             response.ClientId,
             response.ConversationId,
             response.ConversationSignature,
-            _options.Tone);
+            _options.Tone,
+            encryptedConversationSignature,
+            cookies);
     }
 
     /// <summary>

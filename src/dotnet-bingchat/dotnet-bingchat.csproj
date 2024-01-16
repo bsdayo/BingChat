@@ -14,11 +14,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BingChat\BingChat.csproj"/>
+        <ProjectReference Include="..\BingChat\BingChat.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Spectre.Console.Cli" Version="0.46.1-preview.0.7"/>
+        <PackageReference Include="Spectre.Console.Cli" Version="0.46.1-preview.0.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Properties\" />
     </ItemGroup>
 
 </Project>
